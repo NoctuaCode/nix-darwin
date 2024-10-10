@@ -47,6 +47,7 @@
           "nordvpn"
           "raycast"
           "shottr"
+          "wezterm"
         ];
         masApps = {
         };
@@ -54,7 +55,7 @@
       };
 
       fonts.packages = [
-        (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
+        (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
       ];
 
       system.activationScripts.applications.text = let
