@@ -21,6 +21,7 @@
           pkgs.direnv
           pkgs.eza
           pkgs.fd
+          pkgs.fish
           pkgs.fzf
           pkgs.go
           pkgs.mkalias
