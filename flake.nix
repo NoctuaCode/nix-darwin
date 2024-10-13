@@ -17,12 +17,17 @@
       # $ nix-env -qaP | grep wget
       environment.systemPackages =
         [
+          pkgs.bat
           pkgs.direnv
           pkgs.eza
+          pkgs.fd
           pkgs.fzf
           pkgs.go
           pkgs.mkalias
           pkgs.neovim
+          pkgs.nodejs_22
+          pkgs.python3
+          pkgs.ripgrep
           pkgs.stow
           pkgs.tmux
           pkgs.zoxide
@@ -39,6 +44,7 @@
           "betterdisplay"
           "cleanmymac"
           "dbngin"
+          "dbeaver-community"
           "herd"
           "karabiner-elements"
           "kitty"
