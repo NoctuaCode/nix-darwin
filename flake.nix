@@ -15,31 +15,50 @@
 
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
-      environment.systemPackages =
+      environment = {
+        systemPackages =
         [
           pkgs.bat
           pkgs.direnv
+          pkgs.dfu-util
           pkgs.eza
           pkgs.fd
           pkgs.fish
           pkgs.fzf
+          pkgs.gcc-arm-embedded
           pkgs.go
+          pkgs.lazygit
+          pkgs.luarocks
+          pkgs.mercurial
           pkgs.mkalias
           pkgs.neovim
           pkgs.nodejs_22
+          pkgs.pam-reattach
+          pkgs.postgresql_16
           pkgs.python3
+          pkgs.qmk
           pkgs.ripgrep
           pkgs.stow
           pkgs.tmux
           pkgs.zoxide
         ];
+        etc."pam.d/sudo_local".text = ''
+          # Manage by Nix Darwin
+          auth optional ${pkgs.pam-reattach}/lib/pam/pam_reattach.so ignore_ssh
+          auth sufficient pam_tid.so
+        '';
+      };
 
       homebrew = {
         enable = true;
         brews = [
           "mas"
         ];
+        taps = [
+          "nikitabobko/tap"
+        ];
         casks = [
+          "1password"
           "aerospace"
           "arc"
           "betterdisplay"
@@ -47,18 +66,26 @@
           "dbngin"
           "dbeaver-community"
           "herd"
+          "hoppscotch"
           "karabiner-elements"
+          "keymapp"
           "kitty"
           "messenger"
           "miniconda"
           "nordvpn"
           "raycast"
           "shottr"
+          "warp"
           "wezterm"
+          "zed"
         ];
         masApps = {
         };
-        onActivation.cleanup = "zap";
+        onActivation = {
+          autoUpdate = true;
+          cleanup = "zap";
+          upgrade = true;
+        };
       };
 
       fonts.packages = [
@@ -85,21 +112,43 @@
           done
         '';
 
-      system.defaults = {
-        dock.autohide  = true;
-        dock.persistent-apps = [
-          "/Applications/kitty.app"
-          "/Applications/Arc.app"
-          "/Applications/Messenger.app"
-          "/System/Applications/Messages.app"
-          "/System/Applications/Mail.app"
-          "/System/Applications/Calendar.app"
-        ];
-        finder.FXPreferredViewStyle = "clmv";
-        loginwindow.GuestEnabled  = false;
-        NSGlobalDomain.AppleICUForce24HourTime = true;
-        NSGlobalDomain.AppleInterfaceStyle = "Dark";
-        NSGlobalDomain.KeyRepeat = 2;
+      system = {
+        defaults = {
+          finder = {
+            FXPreferredViewStyle = "clmv";
+            AppleShowAllExtensions = true;
+            AppleShowAllFiles = true;
+            CreateDesktop = false;
+            ShowPathbar = true;
+            ShowStatusBar = true;
+          };
+          dock = {
+            appswitcher-all-displays = true;
+            autohide = true;
+            autohide-delay = 0.0;
+            launchanim = false;
+            magnification = false;
+            mineffect = "suck";
+            showhidden = true;
+            show-process-indicators = false;
+            # slow-motion-allowed = true; # FIX: Puedo usar esto cuando se integra LnL7/nix-darwin#1094
+            static-only = true;
+            wvous-br-corner = 5;
+            wvous-tr-corner = 13;
+            persistent-apps = [
+              "/Applications/kitty.app"
+              "/Applications/Arc.app"
+              "/Applications/Messenger.app"
+              "/System/Applications/Messages.app"
+              "/System/Applications/Mail.app"
+              "/System/Applications/Calendar.app"
+            ];
+          };
+          loginwindow.GuestEnabled  = false;
+          NSGlobalDomain.AppleICUForce24HourTime = true;
+          NSGlobalDomain.AppleInterfaceStyle = "Dark";
+          NSGlobalDomain.KeyRepeat = 2;
+        };
       };
       security.pam.enableSudoTouchIdAuth = true;
 
