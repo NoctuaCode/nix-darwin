@@ -6,9 +6,11 @@
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, home-manager }:
   let
     configuration = { pkgs, config, ... }: {
       nixpkgs.config.allowUnfree = true;
@@ -19,6 +21,8 @@
         systemPackages =
         [
           pkgs.bat
+          pkgs.bottom
+          pkgs.btop
           pkgs.direnv
           pkgs.dfu-util
           pkgs.eza
@@ -27,6 +31,7 @@
           pkgs.fzf
           pkgs.gcc-arm-embedded
           pkgs.go
+          pkgs.gum
           pkgs.lazygit
           pkgs.luarocks
           pkgs.mercurial
@@ -38,8 +43,12 @@
           pkgs.python3
           pkgs.qmk
           pkgs.ripgrep
+          pkgs.sesh
           pkgs.stow
+          pkgs.starship
           pkgs.tmux
+          pkgs.yazi
+          pkgs.zig
           pkgs.zoxide
         ];
         etc."pam.d/sudo_local".text = ''
@@ -65,6 +74,8 @@
           "cleanmymac"
           "dbngin"
           "dbeaver-community"
+          "firefox"
+          "google-chrome"
           "herd"
           "hoppscotch"
           "karabiner-elements"
@@ -74,10 +85,12 @@
           "miniconda"
           "nordvpn"
           "raycast"
+          "signal"
+          "sony-ps-remote-play"
           "shottr"
+          "visual-studio-code"
           "warp"
           "wezterm"
-          "zed"
         ];
         masApps = {
         };
@@ -88,7 +101,8 @@
         };
       };
 
-      fonts.packages = [
+      fonts.packages = with pkgs; [
+        fira-code
         (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
       ];
 
@@ -125,29 +139,21 @@
           dock = {
             appswitcher-all-displays = true;
             autohide = true;
-            autohide-delay = 0.0;
+            autohide-delay = 0.10;
             launchanim = false;
             magnification = false;
             mineffect = "suck";
             showhidden = true;
             show-process-indicators = false;
-            # slow-motion-allowed = true; # FIX: Puedo usar esto cuando se integra LnL7/nix-darwin#1094
             static-only = true;
             wvous-br-corner = 5;
             wvous-tr-corner = 13;
-            persistent-apps = [
-              "/Applications/kitty.app"
-              "/Applications/Arc.app"
-              "/Applications/Messenger.app"
-              "/System/Applications/Messages.app"
-              "/System/Applications/Mail.app"
-              "/System/Applications/Calendar.app"
-            ];
           };
           loginwindow.GuestEnabled  = false;
           NSGlobalDomain.AppleICUForce24HourTime = true;
           NSGlobalDomain.AppleInterfaceStyle = "Dark";
           NSGlobalDomain.KeyRepeat = 2;
+          NSGlobalDomain."com.apple.keyboard.fnState" = true;
         };
       };
       security.pam.enableSudoTouchIdAuth = true;
@@ -160,8 +166,8 @@
       nix.settings.experimental-features = "nix-command flakes";
 
       # Create /etc/zshrc that loads the nix-darwin environment.
-      # programs.zsh.enable = true;  # default shell on catalina
-      programs.fish.enable = true;
+      programs.zsh.enable = true;  # default shell on catalina
+      # programs.fish.enable = true;
 
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
@@ -172,12 +178,18 @@
 
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "aarch64-darwin";
+
+      users.users.noctuacode.home = "/Users/noctuacode";
+      home-manager.backupFileExtension = "backup";
+      nix.configureBuildUsers = true;
+      nix.useDaemon = true;
     };
   in
   {
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#NoctuaCodes-MacBook-Air
     darwinConfigurations."NoctuaCodes-MacBook-Air" = nix-darwin.lib.darwinSystem {
+      system = "aarch64-darwin";
       modules = [
         configuration
         nix-homebrew.darwinModules.nix-homebrew
@@ -189,6 +201,15 @@
             autoMigrate = true;
           };
         }
+        home-manager.darwinModules.home-manager
+        {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            #home-manager.users.noctuacode = import ./home.nix;
+
+            # Optionally, use home-manager.extraSpecialArgs to pass
+            # arguments to home.nix
+          }
       ];
     };
 
